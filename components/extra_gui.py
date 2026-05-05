@@ -163,7 +163,7 @@ class RoundedGradientBoxLayout(BoxLayout):
         self._update_canvas()
 
 
-# Creating a custom GUI element like a Button was a bit complex for this Sprint.
+# Creating a custom GUI element like a Rounded Button was a bit complex for this Sprint.
 # For now I am not using the RoundedButton class, but I plan to get this working in a future sprint!
 class RoundedButton(Button):
     def __init__(

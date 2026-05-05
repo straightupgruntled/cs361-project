@@ -117,9 +117,6 @@ class ProjectBoardScreen(Screen):
 
         self.add_widget(root)
 
-        project_data = ProjectData("Test Project")
-        self.create_project_card(project_data)
-
 
     def update_layout(self, *args):
         width = Window.width
