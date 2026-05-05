@@ -19,11 +19,12 @@ class TaskCard(RoundedBoxLayout):
         self.set_radius(15)
 
         layout = FloatLayout()
-        content = BoxLayout(orientation='horizontal', size_hint=(1, 0.5), pos_hint={"center_x": 0.5, "center_y": 0.5})
+        content = BoxLayout(orientation='horizontal', size_hint=(1, 0.8), pos_hint={"center_x": 0.5, "center_y": 0.5})
 
         left_btn = Button(
             text="<",
             size_hint_x=None,
+            size_hint_y=0.5,
             width=40,
             height = 25,
             font_name="TitleFont"
@@ -43,6 +44,7 @@ class TaskCard(RoundedBoxLayout):
         right_btn = Button(
             text=">",
             size_hint_x=None,
+            size_hint_y=0.5,
             width=40,
             height = 25,
             font_name="TitleFont"
@@ -67,7 +69,7 @@ class TaskCard(RoundedBoxLayout):
             text="E",
             size_hint=(None, None),
             size=(20, 20),
-            pos_hint={"left": 0.05, "top": 1},
+            pos_hint={"x": 0, "top": 1},
             font_name="TitleFont"
         )
         edit_btn.bind(on_press=self.edit_task)

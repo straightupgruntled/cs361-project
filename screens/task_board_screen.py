@@ -6,9 +6,9 @@ from kivy.uix.popup import Popup
 
 from components.extra_gui import GradientBoxLayout, ColoredBoxLayout
 from components.task_column import TaskColumn
+from components.task_edit_panel import TaskEditPanel
 
 from models.project_data import ProjectData
-from models.task_data import TaskData
 
 
 class TaskBoardScreen(Screen):
@@ -82,6 +82,9 @@ class TaskBoardScreen(Screen):
 
         self.add_widget(root)
 
+        self.edit_panel = TaskEditPanel() 
+        self.edit_panel.task_board_screen = self
+
 
     def load_project_data(self, project_data: ProjectData):
         self.project_data = project_data
@@ -110,7 +113,14 @@ class TaskBoardScreen(Screen):
 
 
     def open_task_editor(self, task_data):
-        print("OPEN TASK EDITOR HERE.")
+        if self.edit_panel.parent is None:
+            self.add_widget(self.edit_panel)
+        self.edit_panel.open_task(task_data)
+
+
+    def close_task_editor(self):
+        if self.edit_panel.parent:
+            self.remove_widget(self.edit_panel)
 
 
     def back_to_project_board(self, instance):
