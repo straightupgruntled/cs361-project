@@ -2,6 +2,7 @@ from kivy.uix.screenmanager import Screen
 from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.popup import Popup
 
 from components.extra_gui import GradientBoxLayout, ColoredBoxLayout
 
@@ -47,6 +48,7 @@ class TaskBoardScreen(Screen):
             pos_hint={"right": 0.99, "center_y": 0.5},
             background_color=(0.25, 0.25, 0.3, 1)
         )
+        help_btn.bind(on_release=self.open_help_popup)
         
         header.add_widget(back_btn)
         header.add_widget(self.title)
@@ -67,3 +69,48 @@ class TaskBoardScreen(Screen):
     def back_to_project_board(self, instance):
         self.manager.transition.direction = 'down'
         self.manager.current = 'project_board'
+    
+    
+    def open_help_popup(self, instance):
+        layout = BoxLayout(orientation='vertical', padding=15, spacing=10)
+
+        help_text = (
+            "[b]HOW TO USE TASK BOARD[/b]\n\n"
+            "• Click '+' in any column to create a new task\n\n"
+            "• Use '<' and '>' arrows to move tasks between columns\n\n"
+            "• Click 'E' to edit a task's name and description\n\n"
+            "• Click 'X' to delete a task\n\n"
+            "• Changes are saved automatically per project"
+        )
+
+        label = Label(
+            text=help_text,
+            markup=True,
+            font_name="BodyFont",
+            halign="left",
+            valign="top"
+        )
+        label.bind(size=label.setter('text_size'))
+
+        close_btn = Button(
+            text="Close",
+            font_name="TitleFont",
+            size_hint_y=None,
+            height=40,
+            background_color=(0.8, 0.2, 0.2, 1)
+        )
+
+        layout.add_widget(label)
+        layout.add_widget(close_btn)
+
+        popup = Popup(
+            title="Help",
+            title_font="TitleFont",
+            title_size=32,
+            content=layout,
+            size_hint=(None, None),
+            size=(450, 350)
+        )
+
+        close_btn.bind(on_press=popup.dismiss)
+        popup.open()
