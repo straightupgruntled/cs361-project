@@ -163,6 +163,8 @@ class RoundedGradientBoxLayout(BoxLayout):
         self._update_canvas()
 
 
+# Creating a custom GUI element like a Button was a bit complex for this Sprint.
+# For now I am not using the RoundedButton class, but I plan to get this working in a future sprint!
 class RoundedButton(Button):
     def __init__(
         self,
@@ -185,8 +187,8 @@ class RoundedButton(Button):
 
         # Background colors
         self._normal_color = color
-        self._hover_color = hover_color or self._darken(color, 0.9)
-        self._pressed_color = pressed_color or self._darken(color, 0.7)
+        self._hover_color = hover_color or self._darken(color, 0.8)
+        self._pressed_color = pressed_color or self._darken(color, 0.6)
 
         # Text colors
         self._text_normal = text_color
@@ -244,8 +246,11 @@ class RoundedButton(Button):
     def _darken(self, color, factor):
         return [c * factor for c in color[:3]] + [color[3]]
 
-    def set_color(self, color):
+    def set_color(self, color, _update_hovers=False):
         self._normal_color = color
+        if _update_hovers:
+            self._hover_color = self._darken(color, 0.8)
+            self._pressed_color = self._darken(color, 0.6)
         self._update_visual_state()
 
     def set_hover_color(self, color):
@@ -258,6 +263,8 @@ class RoundedButton(Button):
 
     def set_text_color(self, color):
         self._text_normal = color
+        self._text_hover = self._text_hover or color
+        self._text_pressed = self._text_pressed or color
         self._update_visual_state()
 
     def set_hover_text_color(self, color):
