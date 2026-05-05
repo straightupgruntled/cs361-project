@@ -62,12 +62,41 @@ class TaskColumn(RoundedBoxLayout):
 
 
     def add_task(self, task_data, save=True):
-        card = TaskCard(task_data, self)
-        self.task_container.add_widget(card)
+        self.card = TaskCard(task_data)
+
+        self.card.bind(on_move_task=self.move_task)
+        self.card.bind(on_delete_task=self.remove_task)
+        self.card.bind(on_edit_task=self.parent_screen.open_task_editor)
+
+        self.task_container.add_widget(self.card)
 
         if save and self.task_data_list is not None:
             self.task_data_list.append(task_data)
+        
+        if self.title == "BACKLOG TASKS":
+            self.card.toggle_left_disabled(True)
+        elif self.title == "FINISHED TASKS":
+            self.card.toggle_right_disabled(True)
 
+
+    def move_task(self, task_card, direction):
+        screen = self.parent_screen
+        columns = [screen.backlog_column, screen.active_column, screen.finished_column]
+
+        current_index = columns.index(self)
+        new_index = current_index + direction
+
+        # Prevent out-of-bounds
+        if new_index < 0 or new_index >= len(columns):
+            return
+
+        target_column = columns[new_index]
+
+        self.remove_task(task_card)
+
+        # Add to new column
+        target_column.add_task(task_card.task_data, save=True)
+        
 
     def remove_task(self, task_card):
         # Remove from UI
@@ -102,26 +131,4 @@ class TaskColumn(RoundedBoxLayout):
 
     def clear(self):
         self.task_container.clear_widgets()
-
-
-    def move_task(self, task_card, direction):
-        screen = self.parent_screen
-        columns = [screen.backlog_column, screen.active_column, screen.finished_column]
-
-        current_index = columns.index(self)
-        new_index = current_index + direction
-
-        # Prevent out-of-bounds
-        if new_index < 0 or new_index >= len(columns):
-            return
-
-        target_column = columns[new_index]
-
-        self.remove_task(task_card)
-
-        # Add to new column
-        target_column.add_task(task_card.task_data, save=True)
-
-        # Refresh UI
-        screen.refresh_ui()
-        
+    

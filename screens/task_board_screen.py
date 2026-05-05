@@ -112,10 +112,10 @@ class TaskBoardScreen(Screen):
             self.finished_column.add_task(task_data, save=False)
 
 
-    def open_task_editor(self, task_data):
+    def open_task_editor(self, task_card):
         if self.edit_panel.parent is None:
             self.add_widget(self.edit_panel)
-        self.edit_panel.open_task(task_data)
+        self.edit_panel.open_task(task_card.task_data)
 
 
     def close_task_editor(self):

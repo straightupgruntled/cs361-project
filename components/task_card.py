@@ -8,12 +8,11 @@ from components.extra_gui import RoundedBoxLayout
 
 
 class TaskCard(RoundedBoxLayout):
-    def __init__(self, task_data, parent_column, **kwargs):
+    def __init__(self, task_data, **kwargs):
         super().__init__(orientation='vertical', size_hint_y=None, height=120, padding=10, **kwargs)
     
         self.task_data = task_data
         self.task_data.ui_card = self
-        self.parent_column = parent_column
 
         self.set_background_color((0.35, 0.35, 0.35, 1))
         self.set_radius(15)
@@ -21,7 +20,7 @@ class TaskCard(RoundedBoxLayout):
         layout = FloatLayout()
         content = BoxLayout(orientation='horizontal', size_hint=(1, 0.8), pos_hint={"center_x": 0.5, "center_y": 0.5})
 
-        left_btn = Button(
+        self.left_btn = Button(
             text="<",
             size_hint_x=None,
             size_hint_y=0.5,
@@ -29,7 +28,7 @@ class TaskCard(RoundedBoxLayout):
             height = 25,
             font_name="TitleFont"
         )
-        left_btn.bind(on_press=self.move_left)
+        self.left_btn.bind(on_press=self.move_left)
 
         self.label = Label(
             text=task_data.name,
@@ -41,7 +40,7 @@ class TaskCard(RoundedBoxLayout):
         )
         self.label.bind(size=self.label.setter('text_size'))
 
-        right_btn = Button(
+        self.right_btn = Button(
             text=">",
             size_hint_x=None,
             size_hint_y=0.5,
@@ -49,11 +48,11 @@ class TaskCard(RoundedBoxLayout):
             height = 25,
             font_name="TitleFont"
         )
-        right_btn.bind(on_press=self.move_right)
+        self.right_btn.bind(on_press=self.move_right)
 
-        content.add_widget(left_btn)
+        content.add_widget(self.left_btn)
         content.add_widget(self.label)
-        content.add_widget(right_btn)
+        content.add_widget(self.right_btn)
 
         delete_btn = Button(
             text="X",
@@ -79,17 +78,22 @@ class TaskCard(RoundedBoxLayout):
         layout.add_widget(edit_btn)
 
         self.add_widget(layout)
+        
+        self.register_event_type("on_edit_task")
+        self.register_event_type("on_move_task")
+        self.register_event_type("on_delete_task")
 
-        if self.parent_column.title == "BACKLOG TASKS":
-            left_btn.disabled = True
 
-        if self.parent_column.title == "FINISHED TASKS":
-            right_btn.disabled = True
+    def toggle_left_disabled(self, disabled=False):
+        self.left_btn.disabled = disabled
+    
+
+    def toggle_right_disabled(self, disabled=False):
+        self.right_btn.disabled = disabled
 
 
     def edit_task(self, instance):
-        print("EDIT TASK TRIGGERED!")
-        self.parent_column.parent_screen.open_task_editor(self.task_data)
+        self.dispatch("on_edit_task")
 
     
     def delete_task(self, instance):
@@ -131,7 +135,7 @@ class TaskCard(RoundedBoxLayout):
         )
 
         def confirm(instance):
-            self.parent_column.remove_task(self)
+            self.dispatch("on_delete_task")
             popup.dismiss()
 
         def cancel(instance):
@@ -144,12 +148,24 @@ class TaskCard(RoundedBoxLayout):
 
 
     def move_left(self, instance):
-        self.parent_column.move_task(self, direction=-1)
+        self.dispatch("on_move_task", direction=-1)
 
 
     def move_right(self, instance):
-        self.parent_column.move_task(self, direction=1)
+        self.dispatch("on_move_task", direction=1)
 
 
     def refresh(self):
         self.label.text = self.task_data.name
+    
+
+    def on_edit_task(self):
+        print("EDIT TASK TRIGGERED")
+    
+
+    def on_move_task(self, direction=1):
+        print("MOVE TASK TRIGGERED: ", direction)
+
+
+    def on_delete_task(self):
+        print("DELETE TASK TRIGGERED")
