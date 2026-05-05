@@ -59,7 +59,7 @@ class TaskBoardScreen(Screen):
         nav_sidebar = ColoredBoxLayout(orientation='vertical', size_hint_x=None, width=100, color=(0.3, 0.3, 0.3, 1))
 
         body.add_widget(nav_sidebar)
-
+        
         root.add_widget(header)
         root.add_widget(body)
 

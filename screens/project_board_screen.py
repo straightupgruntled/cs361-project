@@ -1,13 +1,23 @@
+from kivy.core.window import Window
 from kivy.uix.screenmanager import Screen
 from kivy.uix.label import Label
 from kivy.uix.floatlayout import FloatLayout
 
+from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.gridlayout import GridLayout
+from kivy.uix.scrollview import ScrollView
+
 from components.extra_gui import ColoredBoxLayout, GradientBoxLayout, RoundedButton
+from components.project_card import ProjectCard
+
+from models.project_data import ProjectData
 
 
 class ProjectBoardScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.project_cards: list[ProjectCard] = []
 
         root = ColoredBoxLayout(
             orientation='vertical', 
@@ -57,26 +67,46 @@ class ProjectBoardScreen(Screen):
 
         main_content = FloatLayout()
 
+        self.grid = GridLayout(cols=1, spacing=15, size_hint=(None, None), padding=15)
+        self.grid.bind(minimum_height=self.grid.setter('height'))
+
+        wrapper = BoxLayout(size_hint=(1, None))
+        wrapper.bind(minimum_height=wrapper.setter('height'))
+        wrapper.add_widget(self.grid)
+
+        self.scroll = ScrollView()
+        self.scroll.add_widget(wrapper)
+
+        main_content.add_widget(self.scroll)
+
         root.add_widget(header)
         root.add_widget(main_content)
 
         self.add_widget(root)
 
-        testbutton = RoundedButton(
-            text="GO TO TASK BOARD",
-            font_name="TitleFont",
-            font_size=20,
-            color=(0.2, 0.6, 0.8, 1),
-            hover_color=(1, 0.5, 0.5, 1),
-            pressed_color=(1, 0.3, 0.3, 1),
-            radius=20,
-            size_hint=(None, None),
-            size=(200, 46),
-            pos_hint={"center_x": 0.5, "center_y": 0.5}
-        )
-        testbutton.bind(on_press=self.open_project)
-        main_content.add_widget(testbutton)
-    
+        project_data = ProjectData("Test Project")
+        self.create_project_card(project_data)
+
+
+    def update_layout(self, *args):
+        width = Window.width
+        card_width = 300
+        spacing = 20
+        cols = max(1, width // (card_width + spacing))
+        self.grid.cols = cols
+        self.grid.width = cols * (card_width + spacing)
+
+
+    def project_selected(self, project_card):
+        self.open_project(self)
+
+
+    def create_project_card(self, project_data):
+        project_card = ProjectCard(project_data, self)
+        self.project_cards.append(project_card)
+        self.grid.add_widget(project_card)
+        self.update_layout()
+
 
     def open_project(self, instance):
         self.manager.transition.direction = 'up'
