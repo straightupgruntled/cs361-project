@@ -97,17 +97,20 @@ class ProjectBoardScreen(Screen):
         self.grid.width = cols * (card_width + spacing)
 
 
-    def project_selected(self, project_card):
-        self.open_project(self)
-
-
     def create_project_card(self, project_data):
         project_card = ProjectCard(project_data, self)
         self.project_cards.append(project_card)
         self.grid.add_widget(project_card)
         self.update_layout()
+    
+
+    def project_selected(self, project_card):
+        self.open_project(self, project_card.project_data)
 
 
-    def open_project(self, instance):
+    def open_project(self, instance, project_data):
         self.manager.transition.direction = 'up'
         self.manager.current = 'task_board'
+        
+        task_board = self.manager.get_screen('task_board')
+        task_board.load_project_data(project_data)

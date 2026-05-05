@@ -6,10 +6,14 @@ from kivy.uix.popup import Popup
 
 from components.extra_gui import GradientBoxLayout, ColoredBoxLayout
 
+from models.project_data import ProjectData
+
 
 class TaskBoardScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+        self.project_data = None
 
         root = ColoredBoxLayout(
             orientation='vertical', 
@@ -64,6 +68,11 @@ class TaskBoardScreen(Screen):
         root.add_widget(body)
 
         self.add_widget(root)
+
+
+    def load_project_data(self, project_data: ProjectData):
+        self.project_data = project_data
+        self.title.text = f"{self.project_data.name} - TASK LIST"
 
 
     def back_to_project_board(self, instance):
