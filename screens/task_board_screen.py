@@ -5,8 +5,10 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.popup import Popup
 
 from components.extra_gui import GradientBoxLayout, ColoredBoxLayout
+from components.task_column import TaskColumn
 
 from models.project_data import ProjectData
+from models.task_data import TaskData
 
 
 class TaskBoardScreen(Screen):
@@ -62,7 +64,18 @@ class TaskBoardScreen(Screen):
 
         nav_sidebar = ColoredBoxLayout(orientation='vertical', size_hint_x=None, width=100, color=(0.3, 0.3, 0.3, 1))
 
+        columns = BoxLayout(spacing=20, padding=20)
+
+        self.backlog_column = TaskColumn("BACKLOG TASKS", (0.2, 0.15, 0.15, 1), self)
+        self.active_column = TaskColumn("ACTIVE TASKS", (0.2, 0.15, 0.05, 1), self)
+        self.finished_column = TaskColumn("FINISHED TASKS", (0.1, 0.2, 0.15, 1), self)
+
+        columns.add_widget(self.backlog_column)
+        columns.add_widget(self.active_column)
+        columns.add_widget(self.finished_column)
+
         body.add_widget(nav_sidebar)
+        body.add_widget(columns)
         
         root.add_widget(header)
         root.add_widget(body)
@@ -72,7 +85,32 @@ class TaskBoardScreen(Screen):
 
     def load_project_data(self, project_data: ProjectData):
         self.project_data = project_data
-        self.title.text = f"{self.project_data.name} - TASK LIST"
+        self.title.text = f"{self.project_data.name} - TASK BOARD"
+
+        self.backlog_column.bind_to_task_data_list(project_data.backlog_tasks)
+        self.active_column.bind_to_task_data_list(project_data.active_tasks)
+        self.finished_column.bind_to_task_data_list(project_data.finished_tasks)
+
+        self.refresh_ui()
+
+
+    def refresh_ui(self):
+        self.backlog_column.clear()
+        self.active_column.clear()
+        self.finished_column.clear()
+
+        for task_data in self.project_data.backlog_tasks:
+            self.backlog_column.add_task(task_data, save=False)
+
+        for task_data in self.project_data.active_tasks:
+            self.active_column.add_task(task_data, save=False)
+
+        for task_data in self.project_data.finished_tasks:
+            self.finished_column.add_task(task_data, save=False)
+
+
+    def open_task_editor(self, task_data):
+        print("OPEN TASK EDITOR HERE.")
 
 
     def back_to_project_board(self, instance):
