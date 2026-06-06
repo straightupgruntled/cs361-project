@@ -6,13 +6,12 @@ from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import NoTransition
 
 from components.extra_gui import GradientBoxLayout, ColoredBoxLayout
-from components.task_column import TaskColumn
-from components.task_edit_panel import TaskEditPanel
+from components.blackboard import DrawingBoard
 
 from models.project_data import ProjectData
 
 
-class TaskBoardScreen(Screen):
+class BlackBoardScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -41,7 +40,7 @@ class TaskBoardScreen(Screen):
         )
         back_btn.bind(on_release=self.back_to_project_board)
 
-        self.title = Label(text="TASK BOARD", font_name="TitleFont", font_size=32)
+        self.title = Label(text="BLACK BOARD", font_name="TitleFont", font_size=32)
 
         help_btn = Button(
             text="?",
@@ -77,6 +76,7 @@ class TaskBoardScreen(Screen):
             size_hint=(None, None),
             background_color=(0.3, 0.3, 0.35, 1),
         )
+        task_board_button.bind(on_release=self.to_task_board)
 
         black_board_button = Button(
             text="Black\nBoard",
@@ -88,35 +88,23 @@ class TaskBoardScreen(Screen):
             size_hint=(None, None),
             background_color=(0.3, 0.3, 0.35, 1),
         )
-        black_board_button.bind(on_release=self.to_black_board)
 
         self.nav_sidebar.add_widget(task_board_button)
         self.nav_sidebar.add_widget(black_board_button)
 
-        columns = BoxLayout(spacing=20, padding=20)
-
-        self.backlog_column = TaskColumn("BACKLOG TASKS", (0.2, 0.15, 0.15, 1), self)
-        self.active_column = TaskColumn("ACTIVE TASKS", (0.2, 0.15, 0.05, 1), self)
-        self.finished_column = TaskColumn("FINISHED TASKS", (0.1, 0.2, 0.15, 1), self)
-
-        columns.add_widget(self.backlog_column)
-        columns.add_widget(self.active_column)
-        columns.add_widget(self.finished_column)
+        self.drawing_board = DrawingBoard()
 
         body.add_widget(self.nav_sidebar)
-        body.add_widget(columns)
+        body.add_widget(self.drawing_board)
 
         root.add_widget(header)
         root.add_widget(body)
 
         self.add_widget(root)
 
-        self.edit_panel = TaskEditPanel()
-        self.edit_panel.task_board_screen = self
-
     def load_project_data(self, project_data: ProjectData):
         self.project_data = project_data
-        self.title.text = f"{self.project_data.name} - TASK BOARD"
+        self.title.text = f"{self.project_data.name} - BLACK BOARD"
 
         self.backlog_column.bind_to_task_data_list(project_data.backlog_tasks)
         self.active_column.bind_to_task_data_list(project_data.active_tasks)
@@ -151,9 +139,9 @@ class TaskBoardScreen(Screen):
         self.manager.transition.direction = "down"
         self.manager.current = "project_board"
 
-    def to_black_board(self, instance):
+    def to_task_board(self, instance):
         self.manager.transition = NoTransition()
-        self.manager.current = "black_board"
+        self.manager.current = "task_board"
 
     def open_help_popup(self, instance):
         layout = BoxLayout(orientation="vertical", padding=15, spacing=10)

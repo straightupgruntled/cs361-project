@@ -12,6 +12,7 @@ from kivy.utils import get_color_from_hex
 
 from components.extra_gui import ColoredBoxLayout, GradientBoxLayout
 from components.project_card import ProjectCard
+from microservices.clients import FuzzSearchMicroClient
 
 from models.project_data import ProjectData
 
@@ -22,71 +23,85 @@ class ProjectBoardScreen(Screen):
 
         self.project_cards: list[ProjectCard] = []
         self.delete_mode = False
+        self.search_client = FuzzSearchMicroClient()
+        self.current_search = ""
 
         root = ColoredBoxLayout(
-            orientation='vertical', 
-            padding=0, 
-            spacing=0, 
-            color=(0.1, 0.08, 0.08, 1)
+            orientation="vertical", padding=0, spacing=0, color=(0.1, 0.08, 0.08, 1)
         )
 
         header = GradientBoxLayout(
-            orientation='vertical',
+            orientation="vertical",
             size_hint_y=None,
-            height=240,
+            height=290,
             spacing=5,
             color_top=(0.1, 0.1, 0.1, 1),
             color_bottom=(0.24, 0.22, 0.22, 1),
-            center_x=0.5
+            center_x=0.5,
         )
 
-        title = Label(
-            text="DEV PROJECT MANAGER", 
-            font_name="TitleFont", 
-            font_size=42
-        )
-        
+        title = Label(text="DEV PROJECT MANAGER", font_name="TitleFont", font_size=42)
+
         subtitle = Label(
-            text="PROJECT BOARD", 
-            font_name="TitleFont", 
-            font_size=32, 
-            size_hint_y=None, 
-            height=40
+            text="PROJECT BOARD",
+            font_name="TitleFont",
+            font_size=32,
+            size_hint_y=None,
+            height=40,
         )
+
+        search_row = BoxLayout(
+            size_hint_y=None,
+            size_hint_x=0.5,
+            pos_hint={"center_x": 0.5},
+            height=45,
+            spacing=5,
+            padding=4,
+        )
+
+        self.search_input = TextInput(
+            hint_text="Search projects by name...",
+            font_name="BodyFont",
+            font_size=14,
+            multiline=False,
+        )
+        self.search_input.bind(text=self.on_search_text_change)
+
+        search_row.add_widget(self.search_input)
 
         tagline = Label(
             text="Creating Project Boards allows you to group tasks and documentation by each project you work on.\n"
-                 "This helps you to stay organized and group your tasks, documentation, and other PM elements into distinct workspaces.\n"
-                 "Deleting Projects is done by clicking Delete Project, then selecting the project to delete.",
+            "This helps you to stay organized and group your tasks, documentation, and other PM elements into distinct workspaces.\n"
+            "Deleting Projects is done by clicking Delete Project, then selecting the project to delete.",
             font_name="BodyFont",
             font_size=14,
             halign="center",
-            valign="middle"
+            valign="middle",
         )
-        tagline.bind(size=tagline.setter('text_size'))
+        tagline.bind(size=tagline.setter("text_size"))
 
         button_row = BoxLayout(
-            size_hint_y=None, 
-            size_hint_x=0.35, 
-            pos_hint={'center_x': 0.5}, 
-            height=50, 
+            size_hint_y=None,
+            size_hint_x=0.35,
+            pos_hint={"center_x": 0.5},
+            height=50,
             spacing=10,
-            padding=4
+            padding=4,
         )
 
         self.create_btn = Button(
-            text="+ CREATE PROJECT", 
-            font_name="TitleFont", 
+            text="+ CREATE PROJECT",
+            font_name="TitleFont",
             font_size=24,
-            background_color=get_color_from_hex("#779777")
+            background_color=get_color_from_hex("#779777"),
         )
         self.create_btn.bind(on_press=self.open_create_popup)
 
         self.delete_btn = Button(
-            text="x DELETE PROJECT", 
-            font_name="TitleFont", 
+            text="x DELETE PROJECT",
+            font_name="TitleFont",
             font_size=24,
-            background_color=get_color_from_hex("#A37D7D")
+            background_color=get_color_from_hex("#A37D7D"),
         )
         self.delete_btn.bind(on_press=self.toggle_delete_mode)
 
@@ -95,16 +110,17 @@ class ProjectBoardScreen(Screen):
 
         header.add_widget(title)
         header.add_widget(subtitle)
+        header.add_widget(search_row)
         header.add_widget(tagline)
         header.add_widget(button_row)
 
         main_content = FloatLayout()
 
         self.grid = GridLayout(cols=1, spacing=15, size_hint=(None, None), padding=15)
-        self.grid.bind(minimum_height=self.grid.setter('height'))
+        self.grid.bind(minimum_height=self.grid.setter("height"))
 
         wrapper = BoxLayout(size_hint=(1, None))
-        wrapper.bind(minimum_height=wrapper.setter('height'))
+        wrapper.bind(minimum_height=wrapper.setter("height"))
         wrapper.add_widget(self.grid)
 
         self.scroll = ScrollView()
@@ -117,7 +133,6 @@ class ProjectBoardScreen(Screen):
 
         self.add_widget(root)
 
-
     def update_layout(self, *args):
         width = Window.width
         card_width = 300
@@ -126,18 +141,30 @@ class ProjectBoardScreen(Screen):
         self.grid.cols = cols
         self.grid.width = cols * (card_width + spacing)
 
-
     def open_create_popup(self, instance):
-        layout = BoxLayout(orientation='vertical', spacing=10, padding=10)
+        layout = BoxLayout(orientation="vertical", spacing=10, padding=10)
 
         input_box = TextInput(hint_text="Project Name", font_name="BodyFont")
-        confirm_btn = Button(text="Create", font_name="TitleFont", font_size=24, size_hint_y=None, height=40, background_color=(0, 1, 0, 1))
+        confirm_btn = Button(
+            text="Create",
+            font_name="TitleFont",
+            font_size=24,
+            size_hint_y=None,
+            height=40,
+            background_color=(0, 1, 0, 1),
+        )
 
         layout.add_widget(input_box)
         layout.add_widget(confirm_btn)
 
-        popup = Popup(title="Create Project", title_font="TitleFont", title_size=24,
-                      content=layout, size_hint=(None, None), size=(400, 200))
+        popup = Popup(
+            title="Create Project",
+            title_font="TitleFont",
+            title_size=24,
+            content=layout,
+            size_hint=(None, None),
+            size=(400, 200),
+        )
 
         def confirm(instance):
             name = input_box.text.strip()
@@ -149,7 +176,6 @@ class ProjectBoardScreen(Screen):
         confirm_btn.bind(on_press=confirm)
         popup.open()
 
-
     def toggle_delete_mode(self, instance):
         self.delete_mode = not self.delete_mode
         self.create_btn.disabled = self.delete_mode
@@ -159,13 +185,11 @@ class ProjectBoardScreen(Screen):
 
         self.delete_btn.text = "CANCEL DELETE" if self.delete_mode else "DELETE PROJECT"
 
-
     def create_project_card(self, project_data):
         project_card = ProjectCard(project_data, self)
         self.project_cards.append(project_card)
         self.grid.add_widget(project_card)
         self.update_layout()
-    
 
     def project_selected(self, project_card):
         if self.delete_mode:
@@ -173,26 +197,30 @@ class ProjectBoardScreen(Screen):
         else:
             self.open_project(project_card.project_data)
 
-
     def open_project(self, project_data):
-        self.manager.transition.direction = 'up'
-        self.manager.current = 'task_board'
-        
-        task_board = self.manager.get_screen('task_board')
+        self.manager.transition.direction = "up"
+        self.manager.current = "task_board"
+
+        task_board = self.manager.get_screen("task_board")
         task_board.load_project_data(project_data)
 
-
     def delete_project(self, project_card):
-        content = BoxLayout(orientation='vertical', spacing=10, padding=10)
+        content = BoxLayout(orientation="vertical", spacing=10, padding=10)
 
         label = Label(
             text=f"Delete project '{project_card.project_data.name}'?\n\n"
-                   "Removing the project will permanantly delete it.",
+            "Removing the project will permanantly delete it.",
             halign="center",
-            font_name="BodyFont")
+            font_name="BodyFont",
+        )
 
         buttons = BoxLayout(size_hint_y=None, height=40, spacing=10)
-        confirm_btn = Button(text="Confirm", font_name="TitleFont", font_size=24, background_color=(0.7, 0.2, 0.2, 1))
+        confirm_btn = Button(
+            text="Confirm",
+            font_name="TitleFont",
+            font_size=24,
+            background_color=(0.7, 0.2, 0.2, 1),
+        )
         cancel_btn = Button(text="Cancel", font_name="TitleFont", font_size=24)
 
         buttons.add_widget(confirm_btn)
@@ -201,8 +229,14 @@ class ProjectBoardScreen(Screen):
         content.add_widget(label)
         content.add_widget(buttons)
 
-        popup = Popup(title="Confirm Deletion", title_font="TitleFont", title_size=24,
-                      content=content, size_hint=(None, None), size=(400, 240))
+        popup = Popup(
+            title="Confirm Deletion",
+            title_font="TitleFont",
+            title_size=24,
+            content=content,
+            size_hint=(None, None),
+            size=(400, 240),
+        )
 
         def confirm(instance):
             self.grid.remove_widget(project_card)
@@ -219,3 +253,41 @@ class ProjectBoardScreen(Screen):
         cancel_btn.bind(on_press=cancel)
 
         popup.open()
+
+    def on_search_text_change(self, instance, value):
+        """Handle search input text changes."""
+        self.current_search = value.strip()
+
+        if not self.current_search:
+            self.show_all_cards()
+        else:
+            self.apply_search_filter()
+
+    def apply_search_filter(self):
+        """Filter project cards based on fuzzy search."""
+        project_names = [card.project_data.name for card in self.project_cards]
+
+        if not project_names:
+            return
+
+        # Get fuzzy search results
+        results = self.search_client.search_projects(self.current_search, project_names)
+
+        # Set a threshold for matching (40% similarity)
+        threshold = 40
+        matching_names = {name for name, score in results if score >= threshold}
+
+        # Show/hide cards based on match
+        for card in self.project_cards:
+            if card.project_data.name in matching_names:
+                card.opacity = 1
+                card.disabled = False
+            else:
+                card.opacity = 0.3
+                card.disabled = True
+
+    def show_all_cards(self):
+        """Show all project cards."""
+        for card in self.project_cards:
+            card.opacity = 1
+            card.disabled = False

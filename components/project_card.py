@@ -1,5 +1,6 @@
 from kivy.uix.button import Button
 
+
 class ProjectCard(Button):
     def __init__(self, project_data, project_screen, **kwargs):
         super().__init__(**kwargs)
@@ -18,10 +19,8 @@ class ProjectCard(Button):
 
         self.bind(on_release=self.on_interact)
 
-
     def on_interact(self, instance):
         self.project_screen.project_selected(self)
-
 
     def set_delete_mode(self, enabled):
         if enabled:

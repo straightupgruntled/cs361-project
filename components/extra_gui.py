@@ -1,7 +1,12 @@
 from kivy.uix.boxlayout import BoxLayout
 from kivy.graphics import (
-    Color, Rectangle, RoundedRectangle,
-    StencilPush, StencilUse, StencilUnUse, StencilPop
+    Color,
+    Rectangle,
+    RoundedRectangle,
+    StencilPush,
+    StencilUse,
+    StencilUnUse,
+    StencilPop,
 )
 from kivy.graphics import Color, Rectangle, RoundedRectangle
 from kivy.uix.button import Button
@@ -31,7 +36,9 @@ class ColoredBoxLayout(BoxLayout):
 
 
 class GradientBoxLayout(BoxLayout):
-    def __init__(self, color_top=(1,1,1,1), color_bottom=(0,0,0,1), steps=40, **kwargs):
+    def __init__(
+        self, color_top=(1, 1, 1, 1), color_bottom=(0, 0, 0, 1), steps=40, **kwargs
+    ):
         super().__init__(**kwargs)
 
         self.color_top = color_top
@@ -61,7 +68,7 @@ class GradientBoxLayout(BoxLayout):
                 Color(r, g, b, a)
                 Rectangle(
                     pos=(self.x, self.y + i * step_height),
-                    size=(self.width, step_height + 1)
+                    size=(self.width, step_height + 1),
                 )
 
     def set_gradient(self, top=None, bottom=None):
@@ -73,7 +80,7 @@ class GradientBoxLayout(BoxLayout):
 
 
 class RoundedBoxLayout(BoxLayout):
-    def __init__(self, color=(1,1,1,1), radius=15, **kwargs):
+    def __init__(self, color=(1, 1, 1, 1), radius=15, **kwargs):
         super().__init__(**kwargs)
 
         self._bg_color_value = color
@@ -86,9 +93,7 @@ class RoundedBoxLayout(BoxLayout):
         with self.canvas.before:
             self._bg_color = Color(*self._bg_color_value)
             self._bg_rect = RoundedRectangle(
-                pos=self.pos,
-                size=self.size,
-                radius=[self._radius_value]
+                pos=self.pos, size=self.size, radius=[self._radius_value]
             )
 
     def _update_canvas(self, *args):
@@ -106,7 +111,9 @@ class RoundedBoxLayout(BoxLayout):
 
 
 class RoundedGradientBoxLayout(BoxLayout):
-    def __init__(self, color_top=(1,1,1,1), color_bottom=(0,0,0,1), radius=15, **kwargs):
+    def __init__(
+        self, color_top=(1, 1, 1, 1), color_bottom=(0, 0, 0, 1), radius=15, **kwargs
+    ):
         super().__init__(**kwargs)
 
         self.color_top = color_top
@@ -127,11 +134,7 @@ class RoundedGradientBoxLayout(BoxLayout):
 
         with self.canvas.before:
             StencilPush()
-            RoundedRectangle(
-                pos=self.pos,
-                size=self.size,
-                radius=[self.radius]
-            )
+            RoundedRectangle(pos=self.pos, size=self.size, radius=[self.radius])
             StencilUse()
 
             for i in range(self.steps):
@@ -145,7 +148,7 @@ class RoundedGradientBoxLayout(BoxLayout):
                 Color(r, g, b, a)
                 Rectangle(
                     pos=(self.x, self.y + i * step_height),
-                    size=(self.width, step_height + 1)
+                    size=(self.width, step_height + 1),
                 )
 
             StencilUnUse()
@@ -213,9 +216,7 @@ class RoundedButton(Button):
         with self.canvas.before:
             self._bg_color = Color(*self._normal_color)
             self._bg_rect = RoundedRectangle(
-                pos=self.pos,
-                size=self.size,
-                radius=[self._radius_value]
+                pos=self.pos, size=self.size, radius=[self._radius_value]
             )
 
     def _update_canvas(self, *args):

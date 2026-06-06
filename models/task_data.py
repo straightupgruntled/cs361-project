@@ -9,6 +9,6 @@ class TaskData:
         self.priority = "Medium"
         self.due_date = None
         self.assigned_to = None
-    
+
     def __str__(self):
         return self.name
